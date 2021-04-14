@@ -1,0 +1,47 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Task3</title>
+</head>
+<body>
+    <label>x0:<input type="number" id="x0"  /></label>
+    <label>y0:<input type="text" id="y0"  /></label>
+    <label>z0:<input type="text" id="z0"  /></label>
+    <label>x1:<input type="number" id="x1"  /></label>
+    <label>y1:<input type="text" id="y1" /></label>
+    <label>z1:<input type="text" id="z1" /></label>
+    <label>x2:<input type="text" id="x2" /></label>
+    <label>y2:<input type="text" id="y2" /></label>
+    <label>z2:<input type="text" id="z2" /></label>
+    <input type="button" value="決定"onclick="e()" />
+    <script src="vec3.js"></script>
+    <script>
+        function e() {
+            var x0 = parseInt(document.getElementById("x0").value);
+            var y0 = parseInt(document.getElementById("y0").value);
+            var z0 = parseInt(document.getElementById("z0").value);
+            var x1 = parseInt(document.getElementById("x1").value);
+            var y1 = parseInt(document.getElementById("y1").value);
+            var z1 = parseInt(document.getElementById("z1").value);
+            var x2 = parseInt(document.getElementById("x2").value);
+            var y2 = parseInt(document.getElementById("y2").value);
+            var z2 = parseInt(document.getElementById("z2").value);
+            
+            var v0 = new Vec3(x0, y0, z0);
+            var v1 = new Vec3(x1, y1, z1);
+            var v2 = new Vec3(x2, y2, z2);
+            function AreaOfTriangle(v0, v1, v2) {
+                
+                var v0v1 = v0.sa(v1);
+                var v0v2 = v0.sa(v2);
+                return 0.5 * Math.sqrt(v0v1.size() * v0v2.size() - (v0v1.seki(v0v2) * v0v1.seki(v0v2)))
+            }
+            var S = AreaOfTriangle(v0, v1, v2);
+            document.write("S="+S);
+
+        }
+        
+    </script>
+</body>
+</html>

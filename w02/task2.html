@@ -1,0 +1,22 @@
+﻿<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Task2</title>
+</head>
+<body>
+    <script src="vec3.js"></script>
+    <script>
+        var x = 54, y = 23, z = 53;
+        document.write("x=" + x + ",y=" + y + ",z=" + z+"<br>\n" );
+        
+        var v = new Vec3(x, y, z);
+        var min = v.min();
+        document.write("min="+min);
+        var mid = v.mid();
+        document.write(",mid="+mid);
+        var max = v.max();
+        document.write(",max="+max);
+    </script>
+</body>
+</html>
