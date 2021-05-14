@@ -1,6 +1,5 @@
 d3.csv("https://narimatsutomoki.github.io/InfoVis2021/W04/w04_task2.csv")
     .then(data => {
-
         var config = {
             parent: '#drawing_region',
             width: 1000,
@@ -90,14 +89,13 @@ class BarChart {
 
     render() {
         let self = this;
-
         self.chart.selectAll("rect").data(self.data).enter()
             .append("rect")
             .attr("x", 0)
             .attr("y", d => self.yscale(d.date))
             .attr("width", d => self.xscale(d.x))
             .attr("height", self.yscale.bandwidth())
-            .style("fill", function (d) { return d.color; });
+            .style("fill", d => d.color);
 
         self.xaxis_group
             .call(self.xaxis);

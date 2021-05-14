@@ -1,21 +1,21 @@
-d3.csv("https://narimatsutomoki.github.io/InfoVis2021/W04/w04_task2.csv")
+d3.csv("https://narimatsutomoki.github.io/InfoVis2021/W08/w08_ex02.csv")
     .then(data => {
-
+        data.forEach(d => { d.x = +d.x; d.y = +d.y; });
         var config = {
             parent: '#drawing_region',
-            width: 1000,
-            height: 3500,
-            margin: { top: 50, right: 10, bottom: 50, left: 100 }
+            width: 256,
+            height: 256,
+            margin: { top: 40, right: 10, bottom: 40, left: 40 }
         };
 
-        const bar_chart = new BarChart(config, data);
-        bar_chart.update();
+        const line_chart = new LineChart(config, data);
+        line_chart.update();
     })
     .catch(error => {
         console.log(error);
     });
 
-class BarChart {
+class LineChart {
 
     constructor(config, data) {
         this.config = {
@@ -44,16 +44,20 @@ class BarChart {
         self.xscale = d3.scaleLinear()
             .range([0, self.inner_width]);
 
-        self.yscale = d3.scaleBand()
+        self.yscale = d3.scaleLinear()
             .range([0, self.inner_height])
-            .paddingInner(0.1);
 
         self.xaxis = d3.axisBottom(self.xscale)
-            .ticks(10)
+            .ticks(5)
             .tickSizeOuter(0);
 
         self.yaxis = d3.axisLeft(self.yscale)
+            .ticks(5)
             .tickSizeOuter(0);
+
+        self.line = d3.line()
+            .x(d => self.xscale(d.x))
+            .y(d => self.yscale(d.y));
 
         self.xaxis_group = self.chart.append('g')
             .attr('transform', `translate(0, ${self.inner_height})`);
@@ -61,7 +65,7 @@ class BarChart {
         self.chart.append("text")
             .attr("x", self.inner_width / 2)
             .attr("y", self.inner_height + self.config.margin.bottom)
-            .text("infections");
+            .text("x");
 
         self.yaxis_group = self.chart.append('g');
 
@@ -69,35 +73,38 @@ class BarChart {
             .attr("transform", "rotate(-90)")
             .attr("y", 0 - self.config.margin.left / 1.5)
             .attr("x", - self.inner_height / 2)
-            .text("date");
+            .text("y");
 
         self.chart.append("text")
             .attr("x", self.inner_width / 5)
             .attr("y", 0 - self.config.margin.top / 3)
             .style("font-size", '24px')
             .style("font-weight", 'bold')
-            .text("Infections of COVID-19 in Osaka");
+            .text("sample data");
     }
 
     update() {
         let self = this;
 
-        self.xscale.domain([0, 300 + parseInt(d3.max(self.data, d => d.x))]);
-        self.yscale.domain(self.data.map(d => d.date));
+        self.xscale.domain([d3.min(self.data, d => d.x), d3.max(self.data, d => d.x)]);
+        self.yscale.domain([d3.max(self.data, d => d.y), 0]);
 
         self.render();
     }
 
     render() {
         let self = this;
-
-        self.chart.selectAll("rect").data(self.data).enter()
-            .append("rect")
-            .attr("x", 0)
-            .attr("y", d => self.yscale(d.date))
-            .attr("width", d => self.xscale(d.x))
-            .attr("height", self.yscale.bandwidth())
-            .style("fill", function (d) { return d.color; });
+        self.chart.append('path')
+            .attr('d', self.line(self.data))
+            .attr('stroke', 'green')
+            .attr('fill', 'none');
+        self.chart.selectAll("circle")
+            .data(self.data)
+            .enter()
+            .append("circle")
+            .attr("cx", d => self.xscale(d.x))
+            .attr("cy", d => self.yscale(d.y))
+            .attr("r", 3);
 
         self.xaxis_group
             .call(self.xaxis);
