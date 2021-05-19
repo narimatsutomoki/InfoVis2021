@@ -5,7 +5,12 @@ d3.csv("https://narimatsutomoki.github.io/InfoVis2021/W08/w08_ex02.csv")
             parent: '#drawing_region',
             width: 256,
             height: 256,
-            margin: { top: 40, right: 10, bottom: 40, left: 40 }
+            margin: { top: 40, right: 10, bottom: 40, left: 40 },
+            padding: 10,
+            radius: 3,
+            shown_radius: 5,
+            color: "black",
+            shown_color: "red"
         };
 
         const line_chart = new LineChart(config, data);
@@ -22,7 +27,12 @@ class LineChart {
             parent: config.parent,
             width: config.width || 256,
             height: config.height || 256,
-            margin: config.margin || { top: 10, right: 10, bottom: 10, left: 10 }
+            margin: config.margin || { top: 10, right: 10, bottom: 10, left: 10 },
+            padding: config.padding || 10,
+            radius: config.radius || 3,
+            shown_radius: config.shown_radius || 5,
+            color: config.color || "black",
+            shown_color: config.shown_color || "red"
         }
         this.data = data;
         this.init();
@@ -89,23 +99,51 @@ class LineChart {
         self.xscale.domain([d3.min(self.data, d => d.x), d3.max(self.data, d => d.x)]);
         self.yscale.domain([d3.max(self.data, d => d.y), 0]);
 
-        self.render();
+        self.circles = self.chart.selectAll("circle")
+            .data(self.data)
+            .enter()
+            .append("circle");
+
+        self.render("");
+
+        self.circles
+            .on('mouseover', function(e, d) {
+                self.render(d.label);
+                d3.select('#tooltip')
+                    .style('opacity', 1)
+                    .html(`<div class="tooltip-label">${d.label}</div>(${d.x}, ${d.y})`);
+            })
+            .on('mousemove', (e) => {
+                d3.select('#tooltip')
+                    .style('left', (e.pageX + self.config.padding) + 'px')
+                    .style('top', (e.pageY + self.config.padding) + 'px');
+            })
+            .on('mouseleave', () => {
+                self.render("");
+                d3.select('#tooltip')
+                    .style('opacity', 0);
+            });
+
     }
 
-    render() {
+    render(pointed_label) {
         let self = this;
         self.chart.append('path')
             .attr('d', self.line(self.data))
             .attr('stroke', 'green')
             .attr('fill', 'none');
-        let circles = self.chart.selectAll("circle")
-            .data(self.data)
-            .enter()
-            .append("circle");
-        circles
+
+        self.circles
             .attr("cx", d => self.xscale(d.x))
             .attr("cy", d => self.yscale(d.y))
-            .attr("r", 3);
+            .attr("r", d => {
+                if (d.label == pointed_label) return self.config.shown_radius;
+                return self.config.radius;
+            })
+            .style("fill", d => {
+                if (d.label == pointed_label) return self.config.shown_color;
+                return self.config.color;
+            });
 
         self.xaxis_group
             .call(self.xaxis);

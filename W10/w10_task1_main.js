@@ -81,7 +81,7 @@ class BarChart {
             .attr("y", 0 - self.config.margin.top / 3)
             .style("font-size", '24px')
             .style("font-weight", 'bold')
-            .text("Infections of COVID-19 in Osaka(î•ñ’ñ‹Ÿ:NHK)");
+            .text("Infections of COVID-19 in Osaka(information source:NHK)");
 
         d3.select(self.config.date)
             .on('click', d => {
