@@ -23,7 +23,10 @@ class BarChart {
             parent: config.parent,
             width: config.width || 256,
             height: config.height || 256,
-            margin: config.margin || { top: 10, right: 10, bottom: 10, left: 10 }
+            margin: config.margin || { top: 10, right: 10, bottom: 10, left: 10 },
+            xlabel: config.xlabel || '',
+            ylabel: config.ylabel || '',
+            cscale: config.cscale
         };
         this.data = data;
         this.init();
@@ -51,10 +54,11 @@ class BarChart {
             .range([self.inner_height, 0]);
 
         self.xaxis = d3.axisBottom(self.xscale)
+            .ticks(['setosa', 'versicolor', 'virginica'])
             .tickSizeOuter(0);
 
         self.yaxis = d3.axisLeft(self.yscale)
-            .ticks(5)
+            .ticks(20)
             .tickSizeOuter(0);
 
         self.xaxis_group = self.chart.append('g')
@@ -65,7 +69,8 @@ class BarChart {
         const xlabel_space = 40;
         self.svg.append('text')
             .attr('x', self.config.width / 2)
-            .attr('y', self.inner_height + self.config.margin.top + xlabel_space);
+            .attr('y', self.inner_height + self.config.margin.top + xlabel_space)
+            .text(self.config.xlabel);
 
         const ylabel_space = 50;
         self.svg.append('text')
@@ -73,14 +78,14 @@ class BarChart {
             .attr('y', self.config.margin.left - ylabel_space)
             .attr('x', -(self.config.height / 2))
             .attr('text-anchor', 'middle')
-            .attr('dy', '1em');
+            .attr('dy', '1em')
+            .text(self.config.ylabel);
     }
 
     update() {
         let self = this;
 
-        const data_map = d3.rollup(self.data, v => v.length, d => d.“s“¹•{Œ§ƒR[ƒh);
-        console.log(dat_map)
+        const data_map = d3.rollup(self.data, v => v.length, d => d.local_code);
         self.aggregated_data = Array.from(data_map, ([key, count]) => ({ key, count }));
 
         self.cvalue = d => d.key;
@@ -106,8 +111,8 @@ class BarChart {
             .attr("x", d => self.xscale(self.xvalue(d)))
             .attr("y", d => self.yscale(self.yvalue(d)))
             .attr("width", self.xscale.bandwidth())
-            .attr("height", d => self.inner_height - self.yscale(self.yvalue(d)))
-            .attr("fill", d => self.config.cscale(self.cvalue(d)));
+            .attr("height", d => self.inner_height - self.yscale(self.yvalue(d)));
+           
 
         self.xaxis_group
             .call(self.xaxis);
