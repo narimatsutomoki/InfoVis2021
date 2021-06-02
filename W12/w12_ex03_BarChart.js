@@ -1,29 +1,13 @@
-d3.csv("https://narimatsutomoki.github.io/InfoVis2021/FinalTask/kosokuhyo_2019.csv")
-    .then(data => {
-        var config = {
-            parent: '#drawing_region',
-            width: 1000,
-            height: 3500,
-            margin: { top: 50, right: 10, bottom: 50, left: 100 },
-            date: '#date',
-            descend: '#descend',
-            ascend: '#ascend'
-        };
-
-        const bar_chart = new BarChart(config, data);
-        bar_chart.update();
-    })
-    .catch(error => {
-        console.log(error);
-    });
-
 class BarChart {
-    constructor(config, data) {
+    constructor (config, data) {
         this.config = {
             parent: config.parent,
             width: config.width || 256,
             height: config.height || 256,
-            margin: config.margin || { top: 10, right: 10, bottom: 10, left: 10 }
+            margin: config.margin || {top:10, right:10, bottom:10, left:10},
+            xlabel: config.xlabel || '',
+            ylabel: config.ylabel || '',
+            cscale: config.cscale
         };
         this.data = data;
         this.init();
@@ -51,6 +35,7 @@ class BarChart {
             .range([self.inner_height, 0]);
 
         self.xaxis = d3.axisBottom(self.xscale)
+            .ticks(['setosa','versicolor','virginica'])
             .tickSizeOuter(0);
 
         self.yaxis = d3.axisLeft(self.yscale)
@@ -64,34 +49,37 @@ class BarChart {
 
         const xlabel_space = 40;
         self.svg.append('text')
+            .style('font-size', '12px')
             .attr('x', self.config.width / 2)
-            .attr('y', self.inner_height + self.config.margin.top + xlabel_space);
+            .attr('y', self.inner_height + self.config.margin.top + xlabel_space)
+            .text( self.config.xlabel );
 
         const ylabel_space = 50;
         self.svg.append('text')
+            .style('font-size', '12px')
             .attr('transform', `rotate(-90)`)
             .attr('y', self.config.margin.left - ylabel_space)
             .attr('x', -(self.config.height / 2))
             .attr('text-anchor', 'middle')
-            .attr('dy', '1em');
+            .attr('dy', '1em')
+            .text( self.config.ylabel );
     }
 
     update() {
         let self = this;
 
-        const data_map = d3.rollup(self.data, v => v.length, d => d.“s“¹•{Œ§ƒR[ƒh);
-        console.log(dat_map)
-        self.aggregated_data = Array.from(data_map, ([key, count]) => ({ key, count }));
+        const data_map = d3.rollup( self.data, v => v.length, d => d.species );
+        self.aggregated_data = Array.from( data_map, ([key,count]) => ({key,count}) );
 
         self.cvalue = d => d.key;
         self.xvalue = d => d.key;
         self.yvalue = d => d.count;
 
-        const items = self.aggregated_data.map(self.xvalue);
+        const items = self.aggregated_data.map( self.xvalue );
         self.xscale.domain(items);
 
         const ymin = 0;
-        const ymax = d3.max(self.aggregated_data, self.yvalue);
+        const ymax = d3.max( self.aggregated_data, self.yvalue );
         self.yscale.domain([ymin, ymax]);
 
         self.render();
@@ -100,14 +88,26 @@ class BarChart {
     render() {
         let self = this;
 
-        self.chart.selectAll("rect")
+        self.chart.selectAll(".bar")
             .data(self.aggregated_data)
             .join("rect")
-            .attr("x", d => self.xscale(self.xvalue(d)))
-            .attr("y", d => self.yscale(self.yvalue(d)))
+            .attr("class", "bar")
+            .attr("x", d => self.xscale( self.xvalue(d) ) )
+            .attr("y", d => self.yscale( self.yvalue(d) ) )
             .attr("width", self.xscale.bandwidth())
-            .attr("height", d => self.inner_height - self.yscale(self.yvalue(d)))
-            .attr("fill", d => self.config.cscale(self.cvalue(d)));
+            .attr("height", d => self.inner_height - self.yscale( self.yvalue(d) ))
+            .attr("fill", d => self.config.cscale( self.cvalue(d) ))
+            .on('click', function(ev,d) {
+                const is_active = filter.includes(d.key);
+                if ( is_active ) {
+                    filter = filter.filter( f => f !== d.key );
+                }
+                else {
+                    filter.push( d.key );
+                }
+                Filter();
+                d3.select(this).classed('active', !is_active);
+            });
 
         self.xaxis_group
             .call(self.xaxis);
