@@ -84,10 +84,11 @@ class BarChart {
 
     update() {
         let self = this;
-
-        const data_map = d3.rollup(self.data, v => v.length, d => d.local_code);
-        self.aggregated_data = Array.from(data_map, ([key, count]) => ({ key, count }));
-
+        const sapporo = self.data.filter(d=> d.local_code == 10 && d.year == 2019);
+        const data_map = d3.rollup(sapporo, v => v.length, d => d.year + "-" + d.month + "-" + d.day);
+        
+        self.aggregated_data = Array.from(data_map, ([key, count]) => ({ key, count })).sort((a, b) => new Date(a.key) - new Date(b.key));
+        console.log(self.aggregated_data);
         self.cvalue = d => d.key;
         self.xvalue = d => d.key;
         self.yvalue = d => d.count;
