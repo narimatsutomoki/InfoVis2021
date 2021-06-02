@@ -1,4 +1,4 @@
-d3.csv("https://narimatsutomoki.github.io/InfoVis2021/FinalTask/kosokuhyo_2019.csv")
+d3.csv("https://narimatsutomoki.github.io/InfoVis2021/FinalTask/honhyo_2019.csv")
     .then(data => {
         var config = {
             parent: '#drawing_region',
