@@ -17,12 +17,11 @@
         console.log(error);
     });*/
 
-d3.text("https://narimatsutomoki.github.io/InfoVis2021/FinalTask/weather_2019.csv")
+d3.csv("https://narimatsutomoki.github.io/InfoVis2021/FinalTask/weather_2019.csv")
     .then(data => {
-        console.log(data.length)
+        console.log(data)
     });
 /*d3.csv("https://narimatsutomoki.github.io/InfoVis2021/FinalTask/weather_2019.csv")
-    
     .then(data => {
         var config = {
             parent: '#drawing_region_linechart',
