@@ -7,10 +7,12 @@ class LineChart {
             height: config.height || 256,
             margin: config.margin || { top: 10, right: 10, bottom: 10, left: 10 },
             xlabel: config.xlabel || '',
-            ylabel: config.ylabel || '',
-            cscale: config.cscale
+            padding: 10
         };
         this.data = data;
+        this.ylabel = "Amount of rainfall(mm)";
+        this.display = d => d.rainfall_sapporo;
+        this.color = "blue";
         this.init();
     }
 
@@ -27,78 +29,100 @@ class LineChart {
         self.inner_width = self.config.width - self.config.margin.left - self.config.margin.right;
         self.inner_height = self.config.height - self.config.margin.top - self.config.margin.bottom;
 
-        self.xscale = d3.scaleLinear()
-            .range([0, self.inner_width]);
+        self.xscale = d3.scaleBand()
+            .range([0, self.inner_width])
+            .domain(self.data.map(d => d.date));
 
         self.yscale = d3.scaleLinear()
             .range([0, self.inner_height]);
 
         self.xaxis = d3.axisBottom(self.xscale)
-            .ticks(5)
+            //2019/**/1‚ðƒvƒƒbƒg
+            .tickValues(self.xscale.domain().filter(function (d, i) {
+                if (d.slice(-2)=="/1") return d;
+            }))
             .tickSizeOuter(0);
 
-        self.yaxis = d3.axisLeft(self.yscale)
+        self.yaxis = d3.axisRight(self.yscale)
             .ticks(20)
             .tickSizeOuter(0);
-
-        self.line = d3.line()
-            .x(d => self.xscale(d.x))
-            .y(d => self.yscale(d.y));
 
         self.xaxis_group = self.chart.append('g')
             .attr('transform', `translate(0, ${self.inner_height})`);
 
-        self.yaxis_group = self.chart.append('g');
+        self.yaxis_group = self.chart.append('g')
+            .attr('transform', `translate(${self.inner_width}, 0)`);
 
-        const xlabel_space = 40;
-        self.svg.append('text')
-            .attr('x', self.config.width / 2)
-            .attr('y', self.inner_height + self.config.margin.top + xlabel_space)
-            .text(self.config.xlabel);
-
-        const ylabel_space = 50;
-        self.svg.append('text')
-            .attr('transform', `rotate(-90)`)
-            .attr('y', self.config.margin.left - ylabel_space)
-            .attr('x', -(self.config.height / 2))
-            .attr('text-anchor', 'middle')
-            .attr('dy', '1em')
-            .text(self.config.ylabel);
+        
     }
 
     update() {
         let self = this;
-        self.agdata = self.data.filter(d => d.rainfall_sapporo);
-        self.rainfall_sapporo = self.data.filter(d => d.rainfall_sapporo);
-        console.log(self.data);
-        self.yscale.domain([d3.max(self.rainfall_sapporo, d => d.y), 0]);
 
-        self.circles = self.chart.selectAll("circle")
-            .data(self.rainfall_sapporo)
-            .enter()
-            .append("circle");
+        self.yscale.domain([d3.max(self.data, d => Number(self.display(d))), 0]);
 
-        self.render(self.rainfall_sapporo);
+        const ylabel_space = 70;
+        let ylabel = self.svg.append('text')
+            .attr('transform', `rotate(-90)`)
+            .attr('y', self.config.width - ylabel_space)
+            .attr('x', -(self.inner_height) / 2)
+            .attr('text-anchor', 'middle')
+            .attr('dy', '1em')
+            .attr('id', "yl");
+        document.getElementById("yl").textContent = self.ylabel;
+
+        self.render();
     }
 
     render() {
         let self = this;
-       
-        self.chart.append('path')
-            .attr('d', self.line(self.rainfall_sapporo))
-            .attr('stroke', 'green')
-            .attr('fill', 'none');
 
-        self.circles
-            .attr("cx", d => self.xscale(d.x))
-            .attr("cy", d => self.yscale(d.y))
-            .attr("r", 5)
-            .style("fill","black");
+        let circles = self.chart.selectAll("circle")
+            .data(self.data)
+            .join('circle');
 
+        circles
+            .attr("cx", d => self.xscale(d.date))
+            .attr("cy", d =>  self.yscale(self.display(d)))
+            .attr("r", d => {
+                if (d.date == self.pointed_date) return 5;
+                return 3;
+            })
+            .style("fill", self.color)
+            .on('mouseover', function (e, d) {
+                self.pointed_date = d.date;
+                self.render();
+                d3.select('#tooltip')
+                    .style('opacity', 1)
+                    .html(`<div class="tooltip-label">${d.date}</div>(${d.date}, ${self.display(d)})`);
+            })
+            .on('mousemove', (e, d) => {
+               
+                d3.select('#tooltip')
+                    .style('left', (e.pageX + self.config.padding) + 'px')
+                    .style('top', (e.pageY + self.config.padding) + 'px');
+            })
+            .on('mouseleave', () => {
+                self.pointed_date = "";
+                self.render();
+                d3.select('#tooltip')
+                    .style('opacity', 0);
+            });
+
+        /*let l = d3.line()
+            .x(d => self.xscale(d.date))
+            .y(d => self.yscale(self.display(d)));
+
+        let lines = self.chart.append('path');
+        lines
+            .attr('d', l(self.data))
+            .attr('stroke', 'green');*/
+    
         self.xaxis_group
             .call(self.xaxis);
 
         self.yaxis_group
             .call(self.yaxis);
+        
     }
 }

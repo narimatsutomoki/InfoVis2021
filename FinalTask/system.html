@@ -22,14 +22,21 @@
 	</style>
     </head>
 	<body>
+		<div>
+			<button type="button" id="switch">Tokyo</button>
+			<button type="button" id="rainfall">rainfall</button>
+			<button type="button" id="sunlight">daylight</button>
+			<button type="button" id="snowfall">snowfall</button>
+			<button type="button" id="avewind">wind speed</button>
+		</div>
 		<div id="tooltip"></div>
 		<div class="container">
-			<div><svg id="drawing_region_scatterplot"></svg></div>
-			<div><svg id="drawing_region_barchart"></svg></div>
+			<div><svg id="drawing_region_scatter"></svg></div>
+			<div><svg id="drawing_region_bar"></svg></div>
 		</div>
 		<script src="https://d3js.org/d3.v6.min.js"></script>
 		<script src="Final_task_BarChart.js"></script>
-		<script src="Final_task_LineChart.js"></script>
+		<script src="Final_task_ScatterPlot.js"></script>
 		<script src="Final_task_main.js"></script>
 	</body>
 </html>
